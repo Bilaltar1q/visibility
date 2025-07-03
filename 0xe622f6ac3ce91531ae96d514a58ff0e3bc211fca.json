@@ -5,7 +5,7 @@
   "name": "TetherUSD",
   "type": "ERC20",
   "ens_address": "",
-  "website": "",
+  "website": "https://tetheracademy.org",
   "logo": {
     "src": "",
     "width": "32",
@@ -13,7 +13,7 @@
     "ipfs_hash": ""
   },
   "support": {
-    "email": "",
+    "email": "inquiry@tetheracademy.org",
     "url": ""
   },
   "social": {
@@ -21,14 +21,15 @@
     "chat": "",
     "facebook": "",
     "forum": "",
-    "github": "",
+    "github": "https://github.com/Bilaltar1q/visibility",
     "gitter": "",
     "instagram": "",
-    "linkedin": "",
+    "linkedin": "https://www.linkedin.com/in/tether-academy-7900b0373/",
     "reddit": "",
     "slack": "",
     "telegram": "",
-    "twitter": "",
-    "youtube": ""
+    "twitter": "https://x.com/TetherAcademy",
+    "youtube": "",
+    "discord": "https://discord.gg/jJzkQqYb"
   }
 }
