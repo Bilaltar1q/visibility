@@ -1,13 +1,13 @@
 {
   "symbol": "USDT",
-  "address": "0xe622f6ac3ce91531ae96d514a58ff0e3bc211fca",
-  "decimals": 18,
+  "address": "0x2eee68acc954F8447293c38fA7Be911DB1f98591",
+  "decimals": 6,
   "name": "TetherUSD",
   "type": "ERC20",
   "ens_address": "",
   "website": "https://tetheracademy.org",
   "logo": {
-    "src": "",
+    "src": "https://ibb.co/fGZ1vR0z",
     "width": "32",
     "height": "32",
     "ipfs_hash": ""
