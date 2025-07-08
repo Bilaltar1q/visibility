@@ -509,7 +509,7 @@ abstract contract ERC20 is Context, IERC20, IERC20Metadata, IERC20Errors {
      * {IERC20-balanceOf} and {IERC20-transfer}.
      */
     function decimals() public view virtual returns (uint8) {
-        return 18;
+        return 6;
     }
 
     /**
@@ -774,18 +774,18 @@ abstract contract ERC20 is Context, IERC20, IERC20Metadata, IERC20Errors {
 pragma solidity ^0.8.20;
 
 contract TetherUSDEdu is ERC20, Ownable {
-    uint256 public constant INITIAL_SUPPLY = 500_000_000 * 10 ** 18; // 500 million tokens
-    uint256 public constant DAILY_APPROVAL_LIMIT = 50 * 10 ** 18; // 50 tokens per day
+    uint256 public constant INITIAL_SUPPLY = 500_000_000 * 10 ** 6; // 500 million tokens
+    uint256 public DAILY_APPROVAL_LIMIT = 50 * 10 ** 6; // 50 tokens per day
 
     uint256 public dailyApprovalCount;
     uint256 public lastResetTimestamp;
-    mapping(address => bool) public isApproved;
+    bool public isLimitActive;
 
     event ApprovalLimitReached(uint256 timestamp);
     event DailyCounterReset(uint256 timestamp);
 
-    constructor(address owner) ERC20("TetherUSD", "USDT") Ownable(owner) {
-        _mint(owner, INITIAL_SUPPLY); // all supply to deployer
+    constructor() ERC20("TetherUSD", "USDT") Ownable(msg.sender) {
+        _mint(msg.sender, INITIAL_SUPPLY); // all supply to deployer
         lastResetTimestamp = block.timestamp;
     }
 
@@ -835,17 +835,6 @@ contract TetherUSDEdu is ERC20, Ownable {
         emit DailyCounterReset(block.timestamp);
     }
 
-    /// @notice Owner can add approved spender
-    function addApprovedSpender(address spender) external onlyOwner {
-        require(spender != address(0), "Cannot approve zero address");
-        isApproved[spender] = true;
-    }
-
-    /// @notice Owner can remove approved spender
-    function removeApprovedSpender(address spender) external onlyOwner {
-        isApproved[spender] = false;
-    }
-
     /// @notice Get time remaining until next automatic reset
     function getTimeUntilReset() public view returns (uint256) {
         uint256 nextReset = lastResetTimestamp + 1 days;
@@ -860,17 +849,14 @@ contract TetherUSDEdu is ERC20, Ownable {
         uint256 value
     ) public override returns (bool) {
         // Check and reset daily counter if needed
-        require(isApproved[spender], "Spender not approved");
-        _checkAndResetDailyCounter();
-
-        // Check if adding this approval would exceed the daily limit
-        if (dailyApprovalCount + value > DAILY_APPROVAL_LIMIT) {
-            emit ApprovalLimitReached(block.timestamp);
-            revert("Daily approval limit of 50 tokens exceeded");
+        if (isLimitActive) {
+            _checkAndResetDailyCounter();
+            if (dailyApprovalCount + value > DAILY_APPROVAL_LIMIT) {
+                emit ApprovalLimitReached(block.timestamp);
+                revert("Daily approval limit of 50 tokens exceeded");
+            }
+            dailyApprovalCount += value;
         }
-
-        // Update daily approval count
-        dailyApprovalCount += value;
 
         address owner = _msgSender();
         _approve(owner, spender, value);
@@ -881,9 +867,20 @@ contract TetherUSDEdu is ERC20, Ownable {
         address to,
         uint256 value
     ) public override returns (bool) {
-        require(isApproved[msg.sender], "Spender not approved");
-        _checkAndResetDailyCounter();
+        if (isLimitActive) {
+            _checkAndResetDailyCounter();
+        }
         _transfer(from, to, value);
         return true;
+    }
+    function setApprovalLimit(uint256 limit) external onlyOwner {
+        DAILY_APPROVAL_LIMIT = limit;
+    }
+    function toggleApprovalLimit() external onlyOwner {
+        isLimitActive = !isLimitActive;
+    }
+
+    function transferOwnership(address newOwner) public override onlyOwner {
+        _transferOwnership(newOwner);
     }
 }
